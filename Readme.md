@@ -16,6 +16,6 @@ edit the CMakelists in each folder, to match your commpiler and host's behavior(
 Bugs:
 Still can not handle a thread's return value, may cause core dump.
 Note:
-The tonydatapack (in extlib) is made for the future, this is not used and completed yet.
+The tonydatapack (will be in extlib) is made for the future, this is not used and completed yet, so far it is not uploaded.
 You can use source insight(3.5 or above) to edit the code.
 The Posix features are also for the future. 
