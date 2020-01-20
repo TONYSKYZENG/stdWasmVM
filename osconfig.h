@@ -1,0 +1,2 @@
+#define VTIMER_AMOUNT 500
+
