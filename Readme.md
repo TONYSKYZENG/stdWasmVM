@@ -5,7 +5,7 @@ The original version is LHBS's ewasmVM from github, however, this one IS NOT A C
 3.using dynamic memory allocation for stacks/callstacks/branch-table.
 To build(linux-x64):
 mkdir build
-cmake ..
+cmake ..(if you do not want the stack imformation to be printed, using -DVM_BUILD_DEBUG_VM=OFF)
 make
 (if the vos is not generated, do these again)
 To run:
