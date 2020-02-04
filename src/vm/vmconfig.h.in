@@ -1,0 +1,4 @@
+#define VM_IS_LIB @VM_IS_LIB@
+#define VM_VERSION @VM_VERSION@
+#define VM_DEBUG @VM_DEBUG@
+#define VM_OPCYCLE @VM_OPCYCLE@

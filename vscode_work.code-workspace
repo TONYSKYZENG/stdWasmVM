@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "include"
+		},
+		{
+			"path": "src"
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"netsp.h": "c",
+			"tdp.h": "c"
+		}
+	}
+}

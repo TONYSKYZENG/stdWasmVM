@@ -1,0 +1,17 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**"
+                "/home/tony/文档/VMOS/cmake_pro_V2/include
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/clang-3.8",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "clang-x64"
+        }
+    ],
+    "version": 4
+}

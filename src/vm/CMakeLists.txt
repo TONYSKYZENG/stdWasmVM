@@ -1,0 +1,22 @@
+option(VM_BUILD_DEBUG_VM  "build this vm program in debug mode" OFF)
+option(VM_BUILD_FAST_VM  "build this vm program for high-speed CPU" OFF)
+include_directories  (${PROJECT_SOURCE_DIR}/include)
+if(VM_BUILD_FAST_VM)
+set(VM_OPCYCLE 5000)
+else()
+set(VM_OPCYCLE 1000)
+endif()
+message(STATUS ${VM_OPCYCLE} " op-codes is one task-cycle")
+if(VM_BUILD_DEBUG_VM)
+set(VM_DEBUG 1)
+message(STATUS "this is a debug version")
+else()
+set(VM_DEBUG 0)
+message(STATUS "debug printf is disabled")
+endif()
+set(VM_VERSION 1.0)
+configure_file(
+        "vmconfig.h.in"
+        "${PROJECT_SOURCE_DIR}/include/vmconfig.h"
+)
+option(MYDEBUG "enable debug compilation" OFF) 
