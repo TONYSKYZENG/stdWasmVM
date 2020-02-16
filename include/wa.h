@@ -3,7 +3,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-
 #define WA_MAGIC   0x6d736100
 #define WA_VERSION 0x01
 
@@ -163,6 +162,8 @@ typedef struct Module {
     uint8_t isSafe;
     int8_t isRun;
     int8_t shouldRestart;
+    //point to other vars
+     void *vtmrP;
 } Module;
 
 //

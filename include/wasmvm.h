@@ -1,7 +1,7 @@
 #ifndef _WASMVM_H_
 #define _WASMVM_H_
 #ifdef __cplusplus
-#define NULL 0
+
 #else
 #define NULL ((void *)0)
 #endif
@@ -28,11 +28,13 @@ extern "C"
 
 Module *vm_create(char *code, int len);
 int vm_exec(Module *m, char *func);
+
 int vm_fuckJump(Module *m, char *func);
 int os_apiP3(uint32_t idx,void *p1,void *p2,Module *m);/*the system call used by vos*/
 void vm_waitSafe(Module *m);
 #include "ostimer.h"
 #include "ostask.h"
+#include "unitnode.h"
 #ifdef __cplusplus
 }
 #endif

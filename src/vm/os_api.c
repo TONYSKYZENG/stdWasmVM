@@ -1,7 +1,7 @@
 #include "oscall.h"
 //VCPUVARS cpuv0,cpuv1;
 uint32_t g_taskRunNo=0;
-extern VTMR g_vtmr;
+//extern VTMR g_vtmr;
 int8_t temp_taskMr_refresh(Module *m)
 {
   /*
@@ -21,7 +21,7 @@ int8_t temp_taskMr_refresh(Module *m)
    	}
    */
    
-		vtmr_refresh(&g_vtmr,m);
+		vtmr_refresh(m->vtmrP,m);
 
 }
 
@@ -51,21 +51,22 @@ uint32_t p=(uint32_t)p1;
   return vcpuvars_newFromFunction(&cpuv1,m,amsg);*/
   char amsg[64];
 	VTHREAD *vthread;
+	VTMR *vr=(VTMR *)m->vtmrP;
 uint32_t p=(uint32_t)p1;
 uint32_t ticks=(uint32_t)p2;
  strcpy(amsg, (m->memory.bytes + p));
 	printf("creat task in %s",amsg);
-	if(g_vtmr.nowThread==0)
+	if(vr->nowThread==0)
 		{
 			vthread=vthread_new(3,2);
-			vthread_addToMr(vthread,&g_vtmr);
+			vthread_addToMr(vthread,vr);
 			vthread_setActive(vthread);
-			g_vtmr.nowThread=vthread;
+			vr->nowThread=vthread;
 		}
  // return vcpuvars_newFromFunction(&cpuv1,m,amsg);
   vthread=vthread_new(3,ticks);
   vthread_fillCpuvars(vthread,m,amsg);
-  vthread_addToMr(vthread,&g_vtmr);
+  vthread_addToMr(vthread,vr);
   vthread_setActive(vthread);
   return vthread->localID;
 //  g_vtmr.nextThread=vthread;
@@ -80,14 +81,15 @@ uint32_t os_terminate(Module *m,void *p1)
 	int i;
 	//m->isRun=0;
 	uint32_t id=(uint32_t)p1;
+	VTMR *vr=(VTMR *)m->vtmrP;
 	printf("teminate id=%d\r\n",id);
 	
 	//m->isRun=1;
-	return vtmr_endLocal(id,&g_vtmr,m);
+	return vtmr_endLocal(id,vr,m);
 }
-uint32_t os_getRunId(void)
-{
-	return g_vtmr.nowThread->localID;
+uint32_t os_getRunId(Module *m)
+{	VTMR *vr=(VTMR *)m->vtmrP;
+	return vr->nowThread->localID;
 }
 void os_sleep(void *p1)
 {
@@ -104,7 +106,7 @@ switch (idx){
 	case 1:os_apiIdx1(p1);break;
 	case IDX_API_NEWTHREAD:return (os_CpuNewThread(m,p1,p2));
 	case IDX_API_DELTHREAD:return (os_terminate(m,p1));
-    case IDX_ADI_GETRUNID:return (os_getRunId());break;
+    case IDX_ADI_GETRUNID:return (os_getRunId(m));break;
 
 
 

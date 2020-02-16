@@ -1,6 +1,11 @@
 
 #ifndef _UNITNODE_H_
 #define _UNITNODE_H_
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -13,6 +18,7 @@
 typedef struct UNITNODE
 {
    //fixed size varibles
+    uint16_t headSize; //tdp v1.3 
     uint16_t nameSize;
     uint16_t inAddrSize;
     uint16_t outAddrSize;
@@ -33,6 +39,18 @@ void unitnode_print(UNITNODE *node);
 uint8_t *unitnode_toNewBin(UNITNODE *unode);
 uint32_t unitnode_binSize(UNITNODE *unode);
 void unitnode_toExistBin(UNITNODE *unode,uint8_t *data);
-
 int8_t unitnode_newFromBin(UNITNODE *unode,uint8_t *data,uint32_t dataSize);
+typedef struct LSNODE //the node attr in local server
+{
+    ELIST ceilList;
+    uint32_t nodeCount;
+    uint8_t *extData;
+}LSNODE;
+void lsnode_init(LSNODE *lsn);
+void lsnode_addNode(LSNODE *lsn,UNITNODE *unode);
+void lsnode_delNode(LSNODE *lsn,UNITNODE *unode);
+UNITNODE *lsnode_findFreeNode(LSNODE *lsn);
+#ifdef __cplusplus
+}
+#endif
 #endif

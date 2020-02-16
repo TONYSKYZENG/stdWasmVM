@@ -24,7 +24,7 @@ cpuv->br_table=m->br_table;
 cpuv->stackSize=m->stackSize;
 cpuv->callstackSize=m->callstackSize;
 cpuv->br_tableSize=m->br_tableSize;
-
+cpuv->headSize=sizeof(VCPUVARS)-sizeof(StackValue *)-sizeof(Frame *)-sizeof(uint32_t   *);
 }
 /*name: vcpuvars_putToM
 description:put a stored cpu's running vars to a module
@@ -505,7 +505,7 @@ date:20200129*/
 uint32_t vcpuvars_binSize(VCPUVARS *cpuv)
 {
 	uint32_t allSize,headSize;
-	headSize=sizeof(VCPUVARS)-sizeof(StackValue *)-sizeof(Frame *)-sizeof(uint32_t   *);
+	headSize=cpuv->headSize;
 	allSize=headSize+(cpuv->stackSize*sizeof(StackValue))+(cpuv->callstackSize*sizeof(Frame))+(cpuv->br_tableSize*sizeof(uint32_t));
 	return allSize;
 }
@@ -518,7 +518,8 @@ void vcpuvars_toExistBin(VCPUVARS *cpuv,uint8_t *data)
 {
 	uint32_t allsize,i,headsize,offsetStack,offsetCall,offsetBr;
 	uint8_t *ptr,*str;
-	headsize=sizeof(VCPUVARS)-sizeof(StackValue *)-sizeof(Frame *)-sizeof(uint32_t   *);
+	cpuv->headSize=sizeof(VCPUVARS)-sizeof(StackValue *)-sizeof(Frame *)-sizeof(uint32_t   *);
+	headsize=cpuv->headSize;
 	offsetStack=headsize;
 	offsetCall=offsetStack+(cpuv->stackSize*sizeof(StackValue));
 	offsetBr=offsetCall+(cpuv->callstackSize*sizeof(Frame));
@@ -558,6 +559,7 @@ uint8_t *vcpuvars_toNewBin(VCPUVARS *cpuv)
 {
 	uint32_t dataSize,headSize;
 	uint8_t *data;
+	cpuv->headSize=sizeof(VCPUVARS)-sizeof(StackValue *)-sizeof(Frame *)-sizeof(uint32_t   *);
 	dataSize=vcpuvars_binSize(cpuv);
 	printf("allocated %d \r\n",dataSize);
 	data=(uint8_t *)malloc(dataSize);
@@ -586,9 +588,9 @@ int8_t vcpuvars_newFromBin(VCPUVARS *cpuv,uint8_t *data,uint32_t dataSize)
 	uint8_t *ptr;
 	VCPUVARS *tv=(VCPUVARS *)data;
 	//first, check size
-	headSize=sizeof(VCPUVARS)-sizeof(StackValue *)-sizeof(Frame *)-sizeof(uint32_t   *);
+	headSize=tv->headSize;
 	allSize=vcpuvars_binSize(tv);
-	if(allSize!=dataSize)
+	if(allSize>dataSize)
 	{//printf("size error all=%d,but size =%d\r\n",allSize,dataSize);
 	return -1;}
 	//prepare new arrays

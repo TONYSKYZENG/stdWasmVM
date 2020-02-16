@@ -6,6 +6,10 @@
 #include "fifo32.h"
 #include "osconfig.h"
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 void initSystimer(void); //this one must be provided by platform_driver
 void systimerTopIsr(void);//this one must be defined in user app
  #define MAX_TIMER	VTIMER_AMOUNT	
@@ -42,4 +46,7 @@ int32_t vtimer_reloadAndRun(VTIMERCTL *tc,int32_t (*body)(void *),uint32_t timeo
 uint32_t vtimerctl_getS(VTIMERCTL *tc);
 uint32_t vtimerctl_getMs(VTIMERCTL *tc);
 uint32_t vtimerctl_getR(VTIMERCTL *tc);
+#ifdef __cplusplus
+}
+#endif
 #endif

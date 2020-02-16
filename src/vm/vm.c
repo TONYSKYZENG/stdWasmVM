@@ -31,6 +31,7 @@ Module *vm_create(char *code, int len){
     m->isRun=1;
     m->mtaskEn=1;
     m->isSafe=1;
+    m->vtmrP=0;
    // m->path = "";
    // init_thunk_in(m);
     return m;

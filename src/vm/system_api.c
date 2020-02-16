@@ -6,7 +6,7 @@ struct api_func{
     char *name;
     void *addr;
 };
-extern VTIMERCTL g_vtimerCtl;
+//extern VTIMERCTL g_vtimerCtl;
 
 struct api_func table[apis];
 
@@ -14,11 +14,11 @@ struct api_func table[apis];
 char msg[100];
 uint32_t api_getS(void)
 {
-return vtimerctl_getS(&g_vtimerCtl);
+return 0;
 }
 uint32_t api_getMs(void)
 {
-return vtimerctl_getMs(&g_vtimerCtl);
+return 0;
 }
 
 int printi(int num){

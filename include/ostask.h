@@ -7,12 +7,17 @@
 #include "osconfig.h"
 #include "wa.h"
 #include "list.h"
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 /*stores the cpu's running values*/
 typedef struct VCPUVARS
 {
 	//uint32_t fIdx;//the index of current block
    // Saved state
    Block *bStart;
+   uint16_t headSize;
    uint32_t    pc;                // program counter
 	uint32_t         sp;                // operand stack pointer
     uint32_t        fp;                // current frame pointer into stack
@@ -91,4 +96,7 @@ int8_t vtmr_refresh(VTMR *vtmr,Module *m);
 int8_t vthread_addToMr(VTHREAD *vthread,VTMR *vtmr);
 int8_t vtmr_endLocal(uint32_t localId,VTMR *vtmr,Module *m);
 VTHREAD *vtmr_getLocalThread(VTMR *vtmr,uint32_t localId);
+#ifdef __cplusplus
+}
+#endif
 #endif

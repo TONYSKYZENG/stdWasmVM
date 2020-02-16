@@ -4,6 +4,11 @@ The stage from low to high is :low-netsp->netsp->TDP->vapor,
 so vapor is an extension of TDP*/
 #ifndef _VAPOR_H_
 #define _VAPOR_H_
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 #include "TDP.h"
 #include "netsp.h"
 #include "ostask.h"
@@ -23,6 +28,7 @@ so vapor is an extension of TDP*/
 #define VAPOR_TYPE_CPUVARS 25
 #define VAPOR_TYPE_RUNMEM 26
 #define VAPOR_TYPE_UNITNODE 27
+#define VAPOR_TYPE_WORKLOAD 28
 #define VAPOR_TYPE_ACK 120
 //defines of vapor command
 #define VAPOR_CMD_NULL 0
@@ -34,7 +40,7 @@ so vapor is an extension of TDP*/
 #define VAPOR_CMD_NOMT 6 //disable multi-thread
 #define VAPOR_CMD_ENMT 7 //enable multi-thread
 #define VAPOR_CMD_RUNCLONE 8
-
+#define VAPOR_CMD_CALLHELP 9 //call help
 //functions
 //Vname
 int8_t vapor_reportVname(NETSOCKET *netsock,int8_t *vname,uint32_t nameSize);
@@ -57,9 +63,15 @@ uint8_t *vapor_getRunMem(uint8_t *rawBin,uint32_t readSize,uint32_t *memSize);
 //unitnode
 int8_t vapor_reportUnitnode(NETSOCKET *netsock,UNITNODE *unode);
 UNITNODE* vapor_getUnitnode(uint8_t *rawBin,uint32_t readSize);
+//work load
+int8_t vapor_sendWorkLoad(NETSOCKET *netsock,uint16_t workload);
+uint16_t vapor_getWorkLoad(uint8_t *rawBin,uint32_t readSize);
 //ack
 int8_t vapor_sendVack(NETSOCKET *netsock);
 //check
 int8_t isVapor(uint8_t *rawBin,uint32_t readSize);
 uint8_t getVaporType(uint8_t *rawBin,uint32_t readSize);
+#ifdef __cplusplus
+}
+#endif
 #endif

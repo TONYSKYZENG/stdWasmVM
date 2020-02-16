@@ -4,6 +4,7 @@ TDPPACK *TDPPACK_genNullPack(void)
 
 TDPPACK *a;
 a=(TDPPACK *)STHNEW(sizeof(TDPPACK));
+a->headSize=sizeof(TDPPACK)-sizeof(uint8_t *);
 return a;
 }
 uint8_t TDPPACK_freePack(TDPPACK * pp)
@@ -68,6 +69,7 @@ TDPPACK *TDPPACK_genPaste(TDPPACK * pp)
 		}
 	a=TDPPACK_genNullPack();
 	a->size=pp->size;
+	a->headSize=pp->headSize;//here!
 		for(i=0;i<N_ID;i++)
 		{
 			a->sender_id[i]=pp->sender_id[i];
@@ -96,6 +98,7 @@ TDPPACK *TDPPACK_genPasteNd(TDPPACK * pp)
 		}
 	a=TDPPACK_genNullPack();
 	a->size=pp->size;
+	a->headSize=pp->headSize;//here!
 		for(i=0;i<N_ID;i++)
 		{
 			a->sender_id[i]=pp->sender_id[i];
@@ -120,7 +123,7 @@ uint8_t *TDPPACK_toNewBin(TDPPACK *pp)
 	uint32_t allsize,i,ppsize,headsize;
 	uint8_t *outtr,*ptr;
 	ppsize=pp->size;
-	headsize=sizeof(TDPPACK)-sizeof(uint8_t *);
+	headsize=pp->headSize;
 	allsize=headsize+ppsize;
 	ptr=(uint8_t *)pp;
     outtr=(uint8_t *)STHNEW(allsize);
@@ -143,7 +146,7 @@ uint8_t TDPPACK_toExiBin(TDPPACK *pp,uint8_t *outtr)
 uint32_t allsize,i,ppsize,headsize;
 	uint8_t *ptr,*str;
 	ppsize=pp->size;
-	headsize=sizeof(TDPPACK)-sizeof(uint8_t *);
+	headsize=pp->headSize;
 	allsize=headsize+ppsize;
 	ptr=(uint8_t *)pp;
 	for(i=0;i<headsize;i++)
@@ -169,7 +172,7 @@ TDPPACK *TDPPACK_fromExiBin(uint8_t *intr)
 		{
 			return a;
 		}
-	dtr=intr+sizeof(TDPPACK)-sizeof(uint8_t *);
+	dtr=intr+ptr->headSize;
 	j=a->size;
   	a->data=(uint8_t *)STHNEW(j);
 	for(i=0;i<j;i++)
@@ -188,12 +191,13 @@ TDPPACK *TDPPACK_fromExiBinDel(uint8_t *intr)
 }
 uint8_t TDPPACK_checkBinSize(uint8_t *rawbin,uint32_t psize)
 {   TDPPACK *tpack;
-    if(psize<sizeof(TDPPACK)-sizeof(uint8_t *))
+ tpack=(TDPPACK *)rawbin;
+    if(psize<tpack->headSize)
     {
         return 0;
     }
-   tpack=(TDPPACK *)rawbin;
-    if(psize!=tpack->size+sizeof(TDPPACK)-sizeof(uint8_t *))
+  
+    if(psize<tpack->size+tpack->headSize)
        {
            return 0;
        }

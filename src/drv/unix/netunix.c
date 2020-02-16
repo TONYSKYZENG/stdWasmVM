@@ -7,6 +7,17 @@
 #include <string.h>
 
 #include <arpa/inet.h>
+
+/*name:netsocket_close
+description:close a server
+input:NETSERVER *ser
+output:NULL
+date:20190205
+*/
+void netserver_close(NETSERVER *ser)
+{
+    close(ser->lfd);
+}
 /*name:unixsocket_works
 description:a thread to support each unix socket
 input:void *arg
@@ -38,7 +49,7 @@ void* unixsocket_works(void* arg)
         if(read_len > 0)
         {
            // buf[read_len+1]='\n';
-            //printf("->-> Obtain if of ,Ip %s, port %d, send info: %s,len=%d\n",client_Ip,client_port,buf,read_len);
+            printf("->-> Obtain if of ,Ip %s, port %d,len=%d\n",client_Ip,client_port,read_len);
             //write(c_info->m_fd,buf,strlen(buf));
             c_info->nsp->recv=(uint8_t *)buf;
             c_info->nsp->recvLen=read_len;
@@ -154,7 +165,7 @@ void *client_socketunix(void *arg)
 
         }else if(len == 0)
         {
-            printf("Serer disconnect \n");
+            printf("Server disconnect \n");
             netsocket_userDisConnect(netsocket);
             break;
         }
@@ -258,6 +269,7 @@ int8_t netsocket_connetctToServer(NETSOCKET *netsocket,uint16_t s_port,int8_t *i
     netsocket->socketPort=s_port;
      netsocket->isBlock=0;
     netsocket->shouldBlock=0;
+    netsocket->userAck=0;
      res = pthread_create(&m_watcherID, 0, client_socketunix, (void*)netsocket);
 
     if(res == -1)
@@ -270,11 +282,63 @@ int8_t netsocket_connetctToServer(NETSOCKET *netsocket,uint16_t s_port,int8_t *i
        
     //close(fd);
     return 1;
-
-
-
 }
 
+/*name:netsocket_connetctToServerBlocked
+description:establish an IPV4 connection to server in specific platform, according to its data, and set blocked initially
+input:NETSOCKET *netsocket,uint16_t s_port,int8_t *ipv4
+output:int8_t 1 for success
+date:20190205
+*/
+int8_t netsocket_connetctToServerBlocked(NETSOCKET *netsocket,uint16_t s_port,int8_t *ipv4)
+{
+uint16_t port = s_port;
+     pthread_t m_watcherID;
+    int fd = socket(AF_INET, SOCK_STREAM, 0);
+    if(-1 == fd)
+    {
+        perror("socket error");
+       // exit(1);
+       return -1;
+    }
+
+    struct sockaddr_in serv;
+
+    serv.sin_port =  htons(port);
+    serv.sin_family = AF_INET;
+    inet_pton(AF_INET, ipv4, &serv.sin_addr.s_addr);
+
+    socklen_t len = sizeof(serv);
+    int res = connect(fd,(struct sockaddr *) &serv, len);
+    if(-1 == res)
+    {
+        perror("connect error");
+        return -1;
+    }
+
+   // printf("Connectt server successful!!\n");
+    netsocket->serverP=0;
+    netsocket->idInSys=fd;
+    netsocket->dataLen=0;
+    netsocket->extData=0;
+    netsocket->socketIpv4=ipv4;
+    netsocket->socketPort=s_port;
+     netsocket->isBlock=1;
+    netsocket->shouldBlock=1;//setting the initial blocked status
+    netsocket->userAck=0;
+    res = pthread_create(&m_watcherID, 0, client_socketunix, (void*)netsocket);
+    if(res == -1)
+        {
+            printf("pthread_creat error");
+          //  exit(1);
+          return -1;
+        }
+	pthread_detach(&m_watcherID);
+       
+    //close(fd);
+    return 1;
+
+}
 /*name:netsocket_send
 description:send data through a socket
 input:NETSOCKET *netsocket,uint8_t *data,uint32_t size
@@ -292,13 +356,15 @@ return 1;
 description:get data through a socket, this is blocked untill something receive
 input:NETSOCKET *netsocket,uint8_t *data
 output:uint32_t for received data size in bytes
-note:after this, use netsocket_setUnblocked()to go back to unblocked receive
-date:20190204
+note:after this, use netsocket_setUnblocked()to go back to unblocked receive,and the socket's data area can be pointed to data
+date:20190205
 */
 uint32_t netsocket_getBlocked(NETSOCKET *netsocket,uint8_t *data,uint32_t maxsize)
 { uint32_t len;
- netsocket_setBlocked(netsocket_setBlocked);
+ netsocket_setBlocked(netsocket);
  len=read(netsocket->idInSys, data, maxsize);
+ netsocket->recv=data;
+ netsocket->recvLen=len;
 //netsocket->shouldBlock=0;
 return len;
 }
@@ -309,7 +375,7 @@ input:uint8_t *ip
 output:int8_t,1 for success
 date:20190204
 */
-int8_t getLocalIpv4(uint8_t *ip){
+int8_t getLocalIpv4(uint8_t * workBase,uint8_t *ip){
         struct ifaddrs *ifAddrStruct;
         void *tmpAddrPtr=NULL;
         //char ip[INET_ADDRSTRLEN];
@@ -320,8 +386,8 @@ int8_t getLocalIpv4(uint8_t *ip){
                         tmpAddrPtr=&((struct sockaddr_in *)ifAddrStruct->ifa_addr)->sin_addr;
                         inet_ntop(AF_INET, tmpAddrPtr, ip, INET_ADDRSTRLEN);
                        
-                        if(strstr(ip,LOCAL_IP_BASE)!=0)
-                        {  printf("%s IP Address:%s\n", ifAddrStruct->ifa_name, ip);
+                        if(strstr(ip,workBase)!=0)
+                        {  //printf("%s IP Address:%s\n", ifAddrStruct->ifa_name, ip);
                              break;
                         }
                 }
@@ -332,3 +398,14 @@ int8_t getLocalIpv4(uint8_t *ip){
         return 1;
 }
 
+/*name:netsocket_close
+description:close a socket
+input:NETSOCKET *netsocket
+output:NULL
+date:20190206
+*/
+void netsocket_close(NETSOCKET *netsocket)
+{
+   // close(netsocket->idInSys);
+   shutdown(netsocket->idInSys,SHUT_RDWR);
+}

@@ -20,6 +20,7 @@ extern "C"
 //structres 
 typedef struct TDPPACK
 {
+uint16_t headSize;
 uint8_t sender_id[N_ID];
 uint8_t receiver_id[N_ID];
 uint32_t size;

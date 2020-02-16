@@ -1,0 +1,2 @@
+/usr/lib/libnetvmoslib.so
+/usr/local/lib/libnetvmoslib.so

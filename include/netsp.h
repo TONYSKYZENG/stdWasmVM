@@ -5,7 +5,12 @@
 #include "netconfig.h"
 #include "list.h"
 #include <stdint.h>
-int8_t getLocalIpv4(uint8_t *ip);//must be provideed by driver net
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+int8_t getLocalIpv4(uint8_t * workBase,uint8_t *ip);//must be provideed by driver net
 //define of server
 typedef struct NETSERVER
 {
@@ -17,6 +22,7 @@ ELIST clientSock;
 }NETSERVER;
 void netserver_init(NETSERVER *ser,uint16_t port,int8_t *ipv4);
 int8_t netserver_establishV4(NETSERVER *ser);
+void netserver_close(NETSERVER *ser);
 typedef struct NETSOCKET
 {
 uint16_t  socketPort; //openport
@@ -31,23 +37,29 @@ ELIST sockList;
 //the following vars are used for the switch of blocking and non-blocking mode
 uint8_t shouldBlock;
 uint8_t isBlock;
+uint8_t userAck;
 }NETSOCKET;
 void netsocket_initForServer(NETSOCKET *netsocket,NETSERVER *sP,uint32_t id,uint16_t s_port,int8_t *ipv4);
+void netsocket_waitUsrAck(NETSOCKET *netsocket);
 int8_t netsocket_connetctToServer(NETSOCKET *netsocket,uint16_t s_port,int8_t *ipv4);//better defined by low-level
-
+int8_t netsocket_connetctToServerBlocked(NETSOCKET *netsocket,uint16_t s_port,int8_t *ipv4);//better defined by low-level
 int8_t netsocket_send(NETSOCKET *netsocket,uint8_t *data,uint32_t size);
 void netsocket_setBlocked(NETSOCKET *netsocket);
 void netsocket_setUnblocked(NETSOCKET *netsocket);
 uint32_t netsocket_getBlocked(NETSOCKET *netsocket,uint8_t *data,uint32_t maxsize);
+void netsocket_close(NETSOCKET *netsocket);
 //void netsocket_initForServer(NETSOCKET *netsocket,NETSERVER *sP,uint32_t id,uint16_t s_port,int8_t *ipv4);
 //these 3 functions must be provided by user, and are working as Isrs
 int32_t netsocket_userConnect(NETSOCKET *netsocket);
 int32_t netsocket_userGet(NETSOCKET *netsocket);
 int32_t netsocket_userDisConnect(NETSOCKET *netsocket);
-
+void netsocket_waitUsrAck(NETSOCKET *netsocket);
+void netsocket_clearUsrAck(NETSOCKET *netsocket);
 int expServerMain(int argc, const char* argv[]);
 int expClientMain(int argc, const char* argv[]);
-
+#ifdef __cplusplus
+}
+#endif
 
 
 

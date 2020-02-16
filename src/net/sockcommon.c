@@ -39,6 +39,7 @@ void netsocket_initForServer(NETSOCKET *netsocket,NETSERVER *sP,uint32_t id,uint
     sP->sockCount++;
     netsocket->isBlock=0;
     netsocket->shouldBlock=0;
+    netsocket->userAck=0;
   //  list_add(&netsocket->sockList,&sP->clientSock);
     //
 }
@@ -51,6 +52,8 @@ date:20190204
 */
 void netsocket_setBlocked(NETSOCKET *netsocket)
 {
+  if(netsocket->isBlock==1||netsocket->shouldBlock==1)
+    return;
   netsocket->shouldBlock=1;
   while(netsocket->isBlock==0);
 
@@ -65,4 +68,28 @@ date:20190204
 void netsocket_setUnblocked(NETSOCKET *netsocket)
 {
   netsocket->shouldBlock=0;
+}
+
+/*name:netsocket_waitUsrAck
+description:wait a netsocket's user Ack
+input:NETSOCKET *netsocket
+output:NULL
+date:20190204
+note: this is a blocked function, user must use netsocket_clearUsrAck somewhere
+*/
+void netsocket_waitUsrAck(NETSOCKET *netsocket)
+{
+  netsocket->userAck=1;
+  while(netsocket->userAck==1);
+}
+/*name:netsocket_clearUsrAck
+description:clear a netsocket's user Ack
+input:NETSOCKET *netsocket
+output:NULL
+date:20190204
+*/
+
+void netsocket_clearUsrAck(NETSOCKET *netsocket)
+{
+  netsocket->userAck=0;
 }

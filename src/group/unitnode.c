@@ -20,6 +20,8 @@ void unitnode_init(UNITNODE *node,uint8_t type,uint8_t *name,uint8_t *inA,uint8_
 	node->cpuFre=fre;
 	node->cpuLoad=0;
 	node->errorCode=0;
+	node->extData=0;
+	node->headSize=sizeof(UNITNODE)-sizeof(uint8_t *)-sizeof(uint8_t *)-sizeof(uint8_t*);
 	list_init(&node->ceilList);
 }
 
@@ -62,7 +64,7 @@ date:20200203*/
 uint32_t unitnode_binSize(UNITNODE *unode)
 {
     uint32_t allSize,headSize;
-	headSize=sizeof(UNITNODE)-sizeof(uint8_t *)-sizeof(uint8_t *)-sizeof(uint8_t*);
+	headSize=unode->headSize;
 	allSize=headSize+(unode->nameSize+unode->inAddrSize+unode->outAddrSize)*sizeof(uint8_t);
     return allSize;
 }
@@ -75,7 +77,7 @@ void unitnode_toExistBin(UNITNODE *unode,uint8_t *data)
 {
     uint32_t allsize,i,headsize,offsetNodeName,offsetIn,offsetOut;
 	uint8_t *ptr,*str;
-	headsize=sizeof(UNITNODE)-sizeof(uint8_t *)-sizeof(uint8_t *)-sizeof(uint8_t*);
+	headsize=unode->headSize;
 	offsetNodeName=headsize;
 	offsetIn=offsetNodeName+(unode->nameSize*sizeof(uint8_t));
 	offsetOut=offsetIn+( unode->inAddrSize*sizeof(uint8_t));
@@ -118,9 +120,10 @@ int8_t unitnode_newFromBin(UNITNODE *unode,uint8_t *data,uint32_t dataSize)
 	uint32_t i;
     uint8_t *uname,*inaddr,*outaddr;
     uint8_t *ptr;
-    headSize=sizeof(UNITNODE)-sizeof(uint8_t *)-sizeof(uint8_t **)-sizeof(uint8_t*);
+   
     UNITNODE *tu;
     tu=(UNITNODE *)data;
+	headSize=tu->headSize;
     //size check
     allSize=unitnode_binSize(tu);
     if(allSize!=dataSize)
@@ -168,4 +171,60 @@ int8_t unitnode_newFromBin(UNITNODE *unode,uint8_t *data,uint32_t dataSize)
     unode->outAddr=outaddr;
     return 1;
 
+}
+/*name:lsnode_init
+description: init a LSNODE
+input:LSNODE *lsn
+output:null
+date:20200204*/
+void lsnode_init(LSNODE *lsn)
+{
+
+	lsn->nodeCount=0;
+	lsn->extData=0;
+	list_init(&lsn->ceilList);
+}
+/*name:lsnode_addNode
+descriptipn；add a unit node to lsnode
+input :LSNODE *lsn,UNITNODE *unode
+output:null
+date:20200204*/
+void lsnode_addNode(LSNODE *lsn,UNITNODE *unode)
+{
+	list_add(&unode->ceilList,&lsn->ceilList);
+	lsn->nodeCount++;
+}
+
+/*name:lsnode_delNode
+descriptipn；delete a unit node from lsnode
+input :LSNODE *lsn,UNITNODE *unode
+output:null
+date:20200204*/
+void lsnode_delNode(LSNODE *lsn,UNITNODE *unode)
+{
+	list_del(&unode->ceilList);
+	lsn->nodeCount--;
+}
+
+/*name:lsnode_findFreeNode
+descriptipn；find a free node in LSNODE
+input :LSNODE *lsn,
+output:UNITNODE *
+date:20200204*/
+UNITNODE *lsnode_findFreeNode(LSNODE *lsn)
+{
+	ELIST *tlist;
+	UNITNODE *tu;
+	list_for_each(tlist,&lsn->ceilList)
+	{
+		tu=list_entry(tlist,UNITNODE,ceilList);
+		if(tu->unitType==NODE_TYPE_GENERAL||tu->unitType==NODE_TYPE_LPEMBEDED)
+		{
+			if(tu->cpuLoad==0)
+			{
+				return tu;
+			}
+		}
+	}
+	return 0;
 }
